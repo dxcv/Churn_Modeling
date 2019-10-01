@@ -1,3 +1,9 @@
+#!/usr/bin/env python
+# coding: utf-8
+
+# In[1]:
+
+
 # Importing Libraries
 import numpy as np
 import matplotlib.pyplot as plt
@@ -6,6 +12,10 @@ import pandas as pd
 # Importing dataset
 dataset = pd.read_csv('Churn_Modelling.csv')
 dataset
+
+
+# In[2]:
+
 
 X = dataset.iloc[:, 3:13].values
 y = dataset.iloc[:, 13].values
@@ -31,14 +41,20 @@ X_train = sc.fit_transform(X_train)
 X_test = sc.transform(X_test)
 
 
+# In[3]:
+
+
 # Fitting the classifier to the Training set
 # Create your classifier here (Ex: Logistic Regression, SVM ...)
 from sklearn.linear_model import LogisticRegression
-classifier = LogisticRegression(random_state = 0)
+classifier = LogisticRegression(solver = 'liblinear', random_state = 0)
 classifier.fit(X_train, y_train)
 
 # Predicting the Test set
 y_pred = classifier.predict(X_test)
+
+
+# In[4]:
 
 
 # Making the Confusion Matrix
@@ -65,14 +81,26 @@ def Classification(clf, X, y):
                'CM': cm}
     return summary
 
+
+# In[5]:
+
+
 Classification(clf = classifier, X = X_train, y = y_train)
+
+
+# In[6]:
+
+
 Classification(clf = classifier, X = X_test, y = y_test)
+
+
+# In[7]:
 
 
 # Applying Grid Search to find the best model and the best parameters
 from sklearn.model_selection import GridSearchCV
 from sklearn.linear_model import LogisticRegression
-classifier = LogisticRegression(random_state = 0)
+classifier = LogisticRegression(solver = 'liblinear', random_state = 0)
 parameter = [{'penalty': ['l1'], 'C': np.arange(0.0001, 0.1, 0.0001)}, 
              {'penalty': ['l2'], 'C': np.arange(0.0001, 0.1, 0.0001)}]
 grid_search = GridSearchCV(estimator = classifier, 
@@ -87,19 +115,25 @@ results = grid_search.cv_results_
 best_parameters
 
 
+# In[8]:
+
+
 # Applying k-fold Cross Validation
 from sklearn.model_selection import cross_val_score
 from sklearn.linear_model import LogisticRegression
 classifier = LogisticRegression(C = best_parameters['C'], 
                                 penalty = best_parameters['penalty'], 
+                                solver = 'liblinear', 
                                 random_state = 0)
 accuracies = cross_val_score(estimator = classifier,
                              X = X_train, y = y_train, 
                              cv = 10)
-plt.plot(accuracies, '--o')
-plt.axhline(accuracies.mean(), color = 'black')
+plt.plot(accuracies, '-o')
+plt.axhline(accuracies.mean(), ls = '--', color = 'black')
 plt.show()
 
+
+# In[9]:
 
 
 # Plot L1 coefficients
@@ -111,6 +145,7 @@ coef = np.zeros(shape = (len(c), p))
 for ii in range(len(c)):
     classifier = LogisticRegression(penalty = 'l1', 
                                     C = c[ii], 
+                                    solver = 'liblinear', 
                                     random_state = 0)
     classifier.fit(X_train, y_train)
     coef[ii, :] = classifier.coef_
@@ -126,17 +161,44 @@ plt.legend()
 plt.show()
 
 
+# In[13]:
+
+
+for i in range(p):
+    plt.plot(Cost[:, i], coef[:, i], '-o', label = i)
+plt.axhline(0, color = 'black')
+plt.axvline(best_parameters['C'], ls = '--', color = 'black')
+plt.xlabel('C')
+plt.ylabel('Coefficients')
+plt.legend()
+plt.show()
+
+
+# In[14]:
+
 
 # Fitting the classifier to the Training set with best_parameters
 from sklearn.linear_model import LogisticRegression
 classifier = LogisticRegression(C = best_parameters['C'], 
                                 penalty = best_parameters['penalty'], 
+                                solver = 'liblinear', 
                                 random_state = 0)
 classifier.fit(X_train, y_train)
 
-# Making the Confusion Matrix
+
+# In[15]:
+
+
 Classification(clf = classifier, X = X_train, y = y_train)
+
+
+# In[16]:
+
+
 Classification(clf = classifier, X = X_test, y = y_test)
+
+
+# In[17]:
 
 
 # Predicting a new data
@@ -183,6 +245,7 @@ y_new_pred = (y_new_pred > 0.5)
 y_new_pred
 
 
+# In[18]:
 
 
 # Example
