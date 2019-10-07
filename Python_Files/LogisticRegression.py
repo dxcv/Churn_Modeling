@@ -97,6 +97,21 @@ Classification(clf = classifier, X = X_test, y = y_test)
 # In[7]:
 
 
+# Applying k-fold Cross Validation
+from sklearn.model_selection import cross_val_score
+from sklearn.linear_model import LogisticRegression
+classifier = LogisticRegression(solver = 'liblinear', random_state = 0)
+accuracies = cross_val_score(estimator = classifier,
+                             X = X_train, y = y_train, 
+                             cv = 10)
+plt.plot(accuracies, '-o')
+plt.axhline(accuracies.mean(), ls = '--', color = 'black')
+plt.show()
+
+
+# In[8]:
+
+
 # Applying Grid Search to find the best model and the best parameters
 from sklearn.model_selection import GridSearchCV
 from sklearn.linear_model import LogisticRegression
@@ -115,7 +130,7 @@ results = grid_search.cv_results_
 best_parameters
 
 
-# In[8]:
+# In[9]:
 
 
 # Applying k-fold Cross Validation
@@ -133,7 +148,33 @@ plt.axhline(accuracies.mean(), ls = '--', color = 'black')
 plt.show()
 
 
-# In[9]:
+# In[10]:
+
+
+# Fitting the classifier to the Training set with best_parameters
+from sklearn.linear_model import LogisticRegression
+classifier = LogisticRegression(C = best_parameters['C'], 
+                                penalty = best_parameters['penalty'], 
+                                solver = 'liblinear', 
+                                random_state = 0)
+classifier.fit(X_train, y_train)
+best_coef = classifier.coef_
+best_L1_norm = np.abs(best_coef).sum()
+
+
+# In[11]:
+
+
+Classification(clf = classifier, X = X_train, y = y_train)
+
+
+# In[12]:
+
+
+Classification(clf = classifier, X = X_test, y = y_test)
+
+
+# In[13]:
 
 
 # Plot L1 coefficients
@@ -142,6 +183,7 @@ p = len(X_train[0])
 c = np.arange(0.0001, 0.1, 0.001)
 Cost = np.zeros(shape = (len(c), p))
 coef = np.zeros(shape = (len(c), p))
+L1_norm = np.zeros(shape = (len(c), p))
 for ii in range(len(c)):
     classifier = LogisticRegression(penalty = 'l1', 
                                     C = c[ii], 
@@ -149,19 +191,20 @@ for ii in range(len(c)):
                                     random_state = 0)
     classifier.fit(X_train, y_train)
     coef[ii, :] = classifier.coef_
+    L1_norm[ii, :] = np.full((1, p), np.abs(classifier.coef_).sum()) 
     Cost[ii, :] = np.full((1, p), c[ii])
 
 for i in range(p):
-    plt.plot(np.log(Cost[:, i]), coef[:, i], '-o', label = i)
+    plt.plot(L1_norm[:, i], coef[:, i], '-o', label = i)
 plt.axhline(0, color = 'black')
-plt.axvline(np.log(best_parameters['C']), ls = '--', color = 'black')
-plt.xlabel('log(C)')
+plt.axvline(best_L1_norm, ls = '--', color = 'black')
+plt.xlabel('L1_norm')
 plt.ylabel('Coefficients')
-plt.legend()
+plt.legend(loc = 'upper left')
 plt.show()
 
 
-# In[13]:
+# In[14]:
 
 
 for i in range(p):
@@ -174,31 +217,7 @@ plt.legend()
 plt.show()
 
 
-# In[14]:
-
-
-# Fitting the classifier to the Training set with best_parameters
-from sklearn.linear_model import LogisticRegression
-classifier = LogisticRegression(C = best_parameters['C'], 
-                                penalty = best_parameters['penalty'], 
-                                solver = 'liblinear', 
-                                random_state = 0)
-classifier.fit(X_train, y_train)
-
-
 # In[15]:
-
-
-Classification(clf = classifier, X = X_train, y = y_train)
-
-
-# In[16]:
-
-
-Classification(clf = classifier, X = X_test, y = y_test)
-
-
-# In[17]:
 
 
 # Predicting a new data
@@ -245,7 +264,7 @@ y_new_pred = (y_new_pred > 0.5)
 y_new_pred
 
 
-# In[18]:
+# In[16]:
 
 
 # Example
