@@ -116,8 +116,8 @@ plt.show()
 from sklearn.model_selection import GridSearchCV
 from sklearn.linear_model import LogisticRegression
 classifier = LogisticRegression(solver = 'liblinear', random_state = 0)
-parameter = [{'penalty': ['l1'], 'C': np.arange(0.0001, 0.1, 0.0001)}, 
-             {'penalty': ['l2'], 'C': np.arange(0.0001, 0.1, 0.0001)}]
+parameter = [{'penalty': ['l1'], 'C': np.arange(0.0001, 1, 0.0001)}, 
+             {'penalty': ['l2'], 'C': np.arange(0.0001, 1, 0.0001)}]
 grid_search = GridSearchCV(estimator = classifier, 
                            param_grid = parameter,
                            scoring = 'accuracy',
@@ -174,13 +174,13 @@ Classification(clf = classifier, X = X_train, y = y_train)
 Classification(clf = classifier, X = X_test, y = y_test)
 
 
-# In[13]:
+# In[17]:
 
 
 # Plot L1 coefficients
 from sklearn.linear_model import LogisticRegression
 p = len(X_train[0])
-c = np.arange(0.0001, 0.1, 0.001)
+c = np.arange(0.0001, 1, 0.001)
 Cost = np.zeros(shape = (len(c), p))
 coef = np.zeros(shape = (len(c), p))
 L1_norm = np.zeros(shape = (len(c), p))
